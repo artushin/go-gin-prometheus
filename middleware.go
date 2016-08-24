@@ -28,22 +28,24 @@ func NewPrometheus(subsystem string) *Prometheus {
 }
 
 func (p *Prometheus) registerMetrics(subsystem string) {
-	p.reqCnt = prometheus.MustRegisterOrGet(prometheus.NewCounterVec(
+	p.reqCnt = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Subsystem: subsystem,
 			Name:      "requests_total",
 			Help:      "How many HTTP requests processed, partitioned by status code and HTTP method.",
 		},
 		[]string{"code", "method", "handler"},
-	)).(*prometheus.CounterVec)
+	)
+	prometheus.MustRegister(p.reqCnt)
 
-	p.reqDur = prometheus.MustRegisterOrGet(prometheus.NewSummary(
+	p.reqDur = prometheus.NewSummary(
 		prometheus.SummaryOpts{
 			Subsystem: subsystem,
 			Name:      "request_duration_microseconds",
 			Help:      "The HTTP request latencies in microseconds.",
 		},
-	)).(prometheus.Summary)
+	)
+	prometheus.MustRegister(p.reqDur)
 }
 
 func (p *Prometheus) Use(e *gin.Engine) {
